@@ -10,8 +10,8 @@ class AplicacionRestaurante:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Restaurante - Tkinter")
-        self.root.geometry("680x520")
-        self.root.minsize(560, 460)
+        self.root.geometry("920x560")
+        self.root.minsize(780, 500)
         self.icono_app = None
 
         # Prepara los servicios que usaran las vistas.

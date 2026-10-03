@@ -1,38 +1,68 @@
-# Fundamentos de manejo de eventos con Tkinter
+# Manejo de eventos con Tkinter
 
 ## Tema
 
-Semana 15: conceptos fundamentales de manejo de eventos en una aplicacion de restaurante con Tkinter.
+Semana 16: Manejo de eventos aplicado a la gestion de usuarios en una aplicacion de restaurante con Tkinter.
 
 ## Objetivo
 
-Evolucionar el proyecto mejorando al trabajo anterior, la aplicacion conserva el login, la arquitectura por capas, la persistencia JSON, la consulta de usuarios y el CRUD de productos, se agrega una operacion sencilla de venta para observar el flujo entre una accion del usuario, un boton con `command=`, un callback, el servicio, la persistencia y la respuesta visual.
+Evolucionar el proyecto en referencia a la Semana 15 sin reconstruirlo desde cero. La aplicacion conserva el login, la arquitectura por capas, la persistencia JSON, el CRUD de productos, el registro de ventas, el menu lateral y la identidad visual, se genero la funcionalidad de manejo por roles es decir que de acuerdo al rol cumplido tiene acceso a cierta información relevante, ejemplo el Administrador tiene más atributos que el empleado y cliente.
 
-## Continuidad desde Semana 14
+En esta semana se transforma la seccion `Usuarios` en una gestion sencilla e interactiva para observar el flujo entre una accion del usuario, un evento de Tkinter, `bind()`, un callback con `event`, el servicio, la persistencia y la respuesta visual.
 
-La interfaz contiene colores, estilos, iconos, menu lateral, barra de estado y organizacion general. La nueva seccion `Ventas` se integra como una capacidad adicional de la misma aplicacion.
+## Continuidad desde Semana 15
 
-## Nueva funcionalidad
+La interfaz mantiene los mismos colores, estilos, iconos, menu lateral, barra de estado y organizacion general. La seccion `Ventas` permanece como ejemplo de `command=` y callbacks. La seccion `Usuarios` se convierte en el ejemplo principal de manejo de eventos.
 
-La venta relaciona:
+## Nueva funcionalidad de Semana 16
 
-```text
-Usuario + Producto + Fecha -> Venta
-```
+La gestion de usuarios permite:
 
-La seccion `Ventas` permite:
+- registrar usuarios;
+- consultar usuarios;
+- seleccionar un usuario desde un `ttk.Treeview`;
+- cargar automaticamente sus datos en el formulario;
+- actualizar usuarios;
+- eliminar usuarios con confirmacion;
+- limpiar o cancelar la seleccion;
+- trabajar con roles simples.
 
-- seleccionar un usuario registrado con `ttk.Combobox`;
-- seleccionar un producto registrado con `ttk.Combobox`;
-- pulsar el boton `Registrar venta`;
-- ejecutar el callback `registrar_venta()` mediante `command=`;
-- guardar la venta en `datos/ventas.json`;
-- mostrar las ventas registradas en un `ttk.Treeview`.
+Roles disponibles en el modelo:
+
+- `Administrador`
+- `Empleado`
+- `Cliente`
+
+Desde la pantalla de gestion solo se pueden registrar usuarios con rol `Empleado` o `Cliente`. La cuenta administradora existente se conserva como cuenta administrativa del sistema.
 
 Flujo educativo:
 
 ```text
-Accion del usuario -> Boton -> command= -> callback -> servicio -> JSON -> Treeview actualizado
+Interaccion del usuario -> evento -> bind() -> callback(event) -> servicio -> JSON -> interfaz actualizada
+```
+
+## Eventos implementados
+
+La seccion `Usuarios` muestra la diferencia entre botones con `command=` y eventos con `bind()`.
+
+Botones con `command=`:
+
+- `Registrar`
+- `Actualizar`
+- `Eliminar`
+- `Limpiar`
+
+Eventos con `bind()`:
+
+- `<<TreeviewSelect>>`: al seleccionar una fila, carga el usuario en el formulario.
+- `<Return>`: registra un usuario desde el formulario.
+- `<Escape>`: limpia el formulario y cancela la seleccion actual.
+- `<<ComboboxSelected>>`: detecta el cambio de rol en el `ttk.Combobox`.
+
+Flujo principal del `Treeview`:
+
+```text
+Treeview -> identificador -> buscar_usuario_por_identificador() -> objeto Usuario -> formulario
 ```
 
 ## Estructura del proyecto
@@ -43,7 +73,7 @@ restaurante_app/
 │   ├── icons/
 │   │   ├── home.png
 │   │   ├── users.png
-│   │   ├── producto.png
+│   │   ├── books.png
 │   │   ├── sales.png        # opcional para la seccion Ventas
 │   │   ├── logout.png
 │   │   ├── add.png
@@ -73,9 +103,9 @@ restaurante_app/
 
 ## Capas
 
-`modelos/`: define las clases `Usuario`, `Producto` y `Venta`, con validaciones basicas para evitar campos vacios.
+`modelos/`: define las clases `Usuario`, `Producto` y `Venta`, con validaciones basicas para evitar campos vacios. `Usuario` incluye el atributo `rol`.
 
-`servicios/`: contiene la logica de consulta, registro, actualizacion, eliminacion y persistencia. `RestauranteServicio` tambien registra ventas.
+`servicios/`: contiene la logica de consulta, registro, actualizacion, eliminacion y persistencia. `RestauranteServicio` registra ventas y administra el CRUD de usuarios.
 
 `datos/`: guarda la informacion persistente en archivos JSON.
 
@@ -83,35 +113,25 @@ restaurante_app/
 
 `assets/icons/`: contiene iconos PNG usados por los botones. Si falta un icono, la aplicacion sigue funcionando con texto.
 
-## Icono opcional de Ventas
-
-Para el nuevo boton del menu lateral se espera opcionalmente este archivo:
-
-```text
-restaurante_app/assets/icons/sales.png
-```
-
-No es obligatorio incluirlo. La funcion `cargar_icono()` devuelve `None` si no lo encuentra y el boton se muestra solo con texto.
-
 ## Pantallas principales
 
 `LoginView`: pantalla de inicio de sesion.
 
 `Inicio`: panel de resumen con usuarios, productos y ventas.
 
-`Usuarios`: pantalla de consulta de usuarios registrados.
+`Usuarios`: pantalla de gestion de usuarios, disponible para el rol `Administrador`.
 
 `Productos`: pantalla de gestion con formulario, botones y tabla para el CRUD basico.
 
-`Ventas`: pantalla nueva para seleccionar un usuario, seleccionar un producto y registrar una venta simple.
+`Ventas`: pantalla para seleccionar un usuario, seleccionar un producto y registrar una venta simple.
 
 ## Componentes Tkinter utilizados
 
 `Label`: textos y titulos.
 
-`Entry`: campos de entrada para login y formulario de productos.
+`Entry`: campos de entrada para login, formulario de productos y formulario de usuarios.
 
-`ttk.Combobox`: selectores de usuario y producto en la vista de ventas.
+`ttk.Combobox`: selectores de usuario y producto en ventas; selector de rol en usuarios.
 
 `ttk.Button`: botones de navegacion y acciones con `command=`.
 
@@ -131,28 +151,51 @@ restaurante_app/datos/productos.json
 restaurante_app/datos/ventas.json
 ```
 
-Al registrar una venta, el servicio agrega el objeto a la coleccion en memoria, convierte las ventas a datos serializables y escribe `ventas.json`.
+Al registrar, actualizar o eliminar usuarios, el servicio actualiza la coleccion en memoria y escribe `usuarios.json`.
 
-## Que NO se trabaja todavia
+Ejemplo de usuario:
 
-En Semana 15 no se utilizan eventos avanzados. No se implementa:
+```json
+{
+    "identificador": "U001",
+    "nombre": "Administrador",
+    "usuario": "admin",
+    "contraseña": "1234",
+    "rol": "Administrador"
+}
+```
 
-- `bind()`;
-- doble clic;
-- eventos de teclado;
-- eventos de mouse;
-- `<<TreeviewSelect>>`;
-- carga automatica desde tablas;
-- seleccion reactiva de filas.
+## Control de acceso
 
-Estos conceptos quedan para la siguiente semana de manejo de eventos.
+La aplicacion usa el objeto `usuario_actual` recibido por `MainView`.
+
+Regla sencilla:
+
+- `Administrador`: puede ver y usar la seccion `Usuarios`.
+- `Empleado` y `Cliente`: no ven la opcion `Usuarios` en el menu lateral.
+
+No se implementa un sistema avanzado de permisos. El objetivo es mantener el ejemplo claro para clase.
+
+## Validaciones principales
+
+La gestion de usuarios valida:
+
+- campos obligatorios;
+- rol valido;
+- identificador duplicado;
+- nombre de usuario duplicado;
+- usuario inexistente al actualizar o eliminar;
+- ausencia de seleccion;
+- intento de eliminar el usuario actualmente autenticado;
+- intento de registrar nuevos administradores desde el formulario;
+- intento de cambiar el rol del administrador actual.
 
 ## Como ejecutar
 
 Desde la carpeta del proyecto:
 
 ```powershell
-cd "C:\Users\Usuario\OneDrive\Documentos\Clase Semana 15 POO\restaurante_app"
+cd "C:\Users\Usuario\OneDrive\Documentos\Restaurante_Semana_16\restaurante_app"
 py main.py
 ```
 
@@ -168,14 +211,43 @@ Usuario: `admin`
 
 Contrasena: `1234`
 
+Tambien puede usarse:
 
-## Nota
+Usuario: `docente`
+
+Contrasena: `abcd`
+
+Usuario cliente de prueba:
+
+Usuario: `ana`
+
+Contrasena: `cliente123`
+
+## Como probar la gestion de usuarios
+
+1. Iniciar la aplicacion.
+2. Acceder con `admin / 1234`.
+3. Verificar que aparece la opcion `Usuarios` en el menu lateral.
+4. Entrar a `Usuarios`.
+5. Registrar un usuario con rol `Cliente`.
+6. Registrar un usuario con rol `Empleado`.
+7. Seleccionar una fila del `Treeview` y verificar que los datos se cargan automaticamente en el formulario.
+8. Modificar nombre, usuario, contraseña o rol y pulsar `Actualizar`.
+9. Seleccionar un usuario y pulsar `Eliminar`; confirmar la eliminacion.
+10. Usar `Escape` para limpiar el formulario y quitar la seleccion.
+11. Usar `Enter` desde el selector de rol para registrar.
+12. Cerrar sesion e iniciar con `docente / abcd`.
+13. Verificar que el usuario empleado no dispone de la opcion `Usuarios`.
+14. Revisar que `Productos` y `Ventas` continuan funcionando.
+
+## Nota educativa
 
 El proyecto mantiene una implementacion sencilla para que el estudiante pueda seguir el crecimiento progresivo de la aplicacion:
 
 ```text
 Semana 14: componentes y contenedores
 Semana 15: accion -> command= -> callback -> servicio -> persistencia -> respuesta visual
+Semana 16: interaccion -> evento -> bind() -> callback(event) -> servicio -> respuesta visual
 ```
 
-La venta no representa todavia un sistema comercial completo. Solo muestra una relacion clara entre un usuario y un producto para estudiar los fundamentos del manejo de eventos mediante botones.
+La gestion de usuarios no representa un sistema de seguridad avanzado. Solo muestra una aplicacion clara y controlada de eventos reales en Tkinter dentro del proyecto de restaurante.
